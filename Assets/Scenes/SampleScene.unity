@@ -191,7 +191,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-74076
+  m_Name: pb_Mesh23780
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -737,7 +737,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 5.25, y: 1.01, z: -5.49}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1897298187}
   - {fileID: 1007031538}
@@ -760,14 +760,21 @@ MonoBehaviour:
   currentMoveSpeed: 0
   moveSpeed: 5
   runSpeed: 10
-  crouchSpeed: 2
+  crouchSpeed: 3
   groundDrag: 5
   jumpForce: 12
-  jumpCooldown: 0.25
   airMultiplier: 0.05
-  crouchCooldown: 0
-  runCooldown: 0
   gravity: 9.8
+  visionColor: {r: 0, g: 0, b: 0, a: 0}
+  visionFadeSpeed: 2
+  visionMaterial: {fileID: 2100000, guid: 550b5f3a48782ec42b19b80baf3681ec, type: 2}
+  runDuration: 2
+  visionDuration: 1
+  jumpCooldown: 0.25
+  crouchCooldown: 1
+  runCooldown: 1
+  visionCooldown: 1
+  interactCooldown: 1
   jumpKey: 32
   crouchKey: 306
   runKey: 304
@@ -775,10 +782,12 @@ MonoBehaviour:
   interactKey: 323
   grounded: 0
   onLadder: 0
-  readyToJump: 0
   isCrouching: 0
   isRunning: 0
+  isVision: 0
+  isInteracting: 0
   orientation: {fileID: 1007031538}
+  cameraPosition: {fileID: 410046451}
 --- !u!1 &410046450
 GameObject:
   m_ObjectHideFlags: 0
@@ -1312,7 +1321,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-25160
+  m_Name: pb_Mesh23966
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -2275,7 +2284,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-55910
+  m_Name: pb_Mesh23872
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2

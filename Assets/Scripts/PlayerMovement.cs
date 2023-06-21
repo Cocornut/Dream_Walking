@@ -5,22 +5,42 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] float currentMoveSpeed;
-    [SerializeField] float moveSpeed;
-    [SerializeField] float runSpeed;
-    [SerializeField] float crouchSpeed;
-    [SerializeField] float groundDrag;
+    [SerializeField] float currentMoveSpeed;                // Current movement speed
+    [SerializeField] float moveSpeed;                       // Normal movement speed
+    [SerializeField] float runSpeed;                        // Movement speed when running
+    [SerializeField] float crouchSpeed;                     // Movement speed while crouching
+    [SerializeField] float groundDrag;                      
 
-    [SerializeField] float jumpForce;
+    [Header("Jumping")]
+    [SerializeField] float jumpForce;                       // Determines velocity for jump
+    [SerializeField] float airMultiplier;                   // Movement in air
+    [SerializeField] float gravity = 9.8f;                  // Modifiable falling speed
+
+    /// <summary>
+    /// Vision toggling is done
+    /// TODO:
+    /// Vision shading
+    /// </summary>
+    [Header("Vision")]
+    [SerializeField] Color visionColor;
+    [SerializeField] float visionFadeSpeed;
+    private float visionStartTime;
+    private float currentVisionIntensity;
+    [SerializeField] Material visionMaterial;
+
+    [Header("Durations")]
+    [SerializeField] float runDuration;
+    private float runStartTime;
+    [SerializeField] float visionDuration;
+
+    [Header("Cooldowns")]                                   // Player mechanics cooldowns
     [SerializeField] float jumpCooldown;
-    [SerializeField] float airMultiplier;
-
     [SerializeField] float crouchCooldown;
     [SerializeField] float runCooldown;
+    [SerializeField] float visionCooldown;
+    [SerializeField] float interactCooldown;    
 
-    [SerializeField] float gravity = 9.8f;
-
-    [Header("Keybinds")]
+    [Header("Keybinds")]                                    // Player Controls
     [SerializeField] KeyCode jumpKey = KeyCode.Space;
     [SerializeField] KeyCode crouchKey = KeyCode.LeftControl;
     [SerializeField] KeyCode runKey = KeyCode.LeftShift;
@@ -28,17 +48,21 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] KeyCode interactKey = KeyCode.Mouse0;
 
     [Header("Checks")]
+    bool readyToJump;
     [SerializeField] bool grounded;
     [SerializeField] bool onLadder;
-    [SerializeField] bool readyToJump;
-
     bool readyToCrouch;
     [SerializeField] bool isCrouching;
     bool readyToRun;
     [SerializeField] bool isRunning;
+    bool readyToVision;
+    [SerializeField] bool isVision;
+    bool readyToInteract;
+    [SerializeField] bool isInteracting;
 
     [Header("Components")]
     public Transform orientation;
+    public Transform cameraPosition;
     Vector3 moveDirection;
     Rigidbody rb;
 
@@ -54,6 +78,8 @@ public class PlayerMovement : MonoBehaviour
         ResetJump();
         ResetCrouch();
         ResetRun();
+        ResetVision();
+        ResetInteraction();
     }
 
     private void Update()
@@ -65,6 +91,11 @@ public class PlayerMovement : MonoBehaviour
             rb.drag = groundDrag;
         else
             rb.drag = 0;
+
+        //if (isVision)
+        //{
+        //    Vision();
+        //}
     }
 
     private void FixedUpdate()
@@ -92,14 +123,36 @@ public class PlayerMovement : MonoBehaviour
         {
             isCrouching = !isCrouching;
 
+            Crouch();
+
             Invoke(nameof(ResetCrouch), crouchCooldown);
         }        
         
         if (Input.GetKeyDown(runKey) && readyToRun && grounded)
         {
+            if (!isRunning)
+            {
+                isRunning = true;
+                runStartTime = Time.time;
+            }
+            else
+            {
+                isRunning = false;
+                runStartTime = 0f;
+                Invoke(nameof(ResetRun), runCooldown);
+            }
             isRunning = !isRunning;
 
             Invoke(nameof(ResetRun), runCooldown);
+        }
+
+        if (Input.GetKeyDown(visionKey) && readyToVision)
+        {
+            isVision = !isVision;
+            visionStartTime = Time.time;
+            currentVisionIntensity = 0f;
+
+            Invoke(nameof(ResetVision), visionCooldown);
         }
     }
 
@@ -170,7 +223,17 @@ public class PlayerMovement : MonoBehaviour
 
     private void Crouch()
     {
+        if (isCrouching)
+        {
+            transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y - 0.5f, transform.localScale.z);
+            transform.position = new Vector3(transform.position.x, transform.position.y - 0.5f, transform.position.z);
+        }
+        else
+        {
+            transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y + 0.5f, transform.localScale.z);
+            transform.position = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z);
 
+        }
     }
 
     private void ApplyGravity()
@@ -197,7 +260,15 @@ public class PlayerMovement : MonoBehaviour
         readyToRun = true;
     }
 
+    private void ResetVision()
+    {
+        readyToVision = true; 
+    }
 
+    private void ResetInteraction()
+    {
+        readyToInteract = true;
+    }
 
     private void OnCollisionStay(Collision collision)
     {
@@ -218,7 +289,6 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-
     private void OnCollisionExit(Collision collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
@@ -231,4 +301,32 @@ public class PlayerMovement : MonoBehaviour
             rb.useGravity = true;
         }
     }
+
+    ///TODO///
+    ///Do Vision Shading
+    //private void ApplyVisionEffect(float intensity)
+    //{
+    //    // Adjust the overall intensity of the vision effect
+    //    RenderSettings.ambientLight = Color.Lerp(Color.white, visionColor, intensity);
+    //}
+
+    //private void Vision()
+    //{
+    //    float visionTime = Time.time - visionStartTime;
+    //    float visionProgress = Mathf.Clamp01(visionTime / visionDuration);
+
+    //    // Calculate current vision intensity (darkness) based on the vision progress
+    //    currentVisionIntensity = Mathf.Lerp(0f, 1f, visionProgress);
+
+    //    // Apply vision effect to the material
+    //    visionMaterial.SetFloat("_VisionIntensity", currentVisionIntensity);
+    //    visionMaterial.SetColor("_VisionColor", visionColor);
+
+    //    if (visionProgress >= 1f)
+    //    {
+    //        // Vision effect completed, reset variables
+    //        isVision = false;
+    //        currentVisionIntensity = 0f;
+    //    }
+    //}
 }
