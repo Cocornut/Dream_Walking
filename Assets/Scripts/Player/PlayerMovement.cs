@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Rendering.Universal;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -16,28 +17,17 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float airMultiplier;                   // Movement in air
     [SerializeField] float gravity = 9.8f;                  // Modifiable falling speed
 
-    /// <summary>
-    /// Vision toggling is done
-    /// TODO:
-    /// Vision shading
-    /// </summary>
+    //Only added outlines for now
     [Header("Vision")]
-    [SerializeField] Color visionColor;
-    [SerializeField] float visionFadeSpeed;
-    private float visionStartTime;
-    private float currentVisionIntensity;
-    [SerializeField] Material visionMaterial;
-
-    [Header("Durations")]
-    [SerializeField] float runDuration;
-    private float runStartTime;
-    [SerializeField] float visionDuration;
+    [SerializeField] RenderFeatureManager renderFeatureManager;
 
     [Header("Cooldowns")]                                   // Player mechanics cooldowns
     [SerializeField] float jumpCooldown;
     [SerializeField] float crouchCooldown;
     [SerializeField] float runCooldown;
+    [SerializeField] private float runCurrent;
     [SerializeField] float visionCooldown;
+    [SerializeField] private float visionCurrent;
     [SerializeField] float interactCooldown;    
 
     [Header("Keybinds")]                                    // Player Controls
@@ -53,9 +43,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] bool onLadder;
     bool readyToCrouch;
     [SerializeField] bool isCrouching;
-    bool readyToRun;
     [SerializeField] bool isRunning;
-    bool readyToVision;
     [SerializeField] bool isVision;
     bool readyToInteract;
     [SerializeField] bool isInteracting;
@@ -77,13 +65,14 @@ public class PlayerMovement : MonoBehaviour
         rb.freezeRotation = true;
         ResetJump();
         ResetCrouch();
-        ResetRun();
-        ResetVision();
+        runCurrent = runCooldown;
+        visionCurrent = visionCooldown;
         ResetInteraction();
     }
 
     private void Update()
     {
+        CheckBooleans();
         MyInput();      
 
         // Handle drag
@@ -91,11 +80,6 @@ public class PlayerMovement : MonoBehaviour
             rb.drag = groundDrag;
         else
             rb.drag = 0;
-
-        //if (isVision)
-        //{
-        //    Vision();
-        //}
     }
 
     private void FixedUpdate()
@@ -128,31 +112,68 @@ public class PlayerMovement : MonoBehaviour
             Invoke(nameof(ResetCrouch), crouchCooldown);
         }        
         
-        if (Input.GetKeyDown(runKey) && readyToRun && grounded)
+        if (Input.GetKeyDown(runKey) && grounded)
         {
-            if (!isRunning)
+            if (!isRunning && runCurrent >= runCooldown)
             {
                 isRunning = true;
-                runStartTime = Time.time;
             }
-            else
+            else if (isRunning)
             {
                 isRunning = false;
-                runStartTime = 0f;
-                Invoke(nameof(ResetRun), runCooldown);
             }
-            isRunning = !isRunning;
-
-            Invoke(nameof(ResetRun), runCooldown);
         }
 
-        if (Input.GetKeyDown(visionKey) && readyToVision)
+        if (Input.GetKeyDown(visionKey))
         {
-            isVision = !isVision;
-            visionStartTime = Time.time;
-            currentVisionIntensity = 0f;
+            if (!isVision && visionCurrent >= visionCooldown)
+            {
+                isVision = true;
+            }
+            else if (isVision)
+            {
+                isVision = false;
+            }
+        }
+    }
 
-            Invoke(nameof(ResetVision), visionCooldown);
+
+    private void CheckBooleans()
+    {
+        if (runCurrent > 0 && isRunning)
+        {
+            runCurrent -= Time.deltaTime;
+            if (runCurrent <= 0)
+            {
+                isRunning = false;
+            }
+        }
+        else if (!isRunning && runCurrent < runCooldown)
+        {
+            runCurrent += Time.deltaTime;
+            if (runCurrent >= runCooldown)
+            {
+                runCurrent = runCooldown;
+            }
+        }
+
+        if (visionCurrent > 0 && isVision)
+        {
+            ToggleRenderFeatures(true);
+            visionCurrent -= Time.deltaTime;
+            if (visionCurrent <= 0)
+            {
+                isVision = false;
+            }
+        }
+        else if (!isVision && visionCurrent < visionCooldown)
+        {
+            ToggleRenderFeatures(false);
+            visionCurrent += Time.deltaTime;
+            if (visionCurrent >= visionCooldown)
+            {
+                visionCurrent = visionCooldown;
+            }
         }
     }
 
@@ -236,6 +257,8 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+
+
     private void ApplyGravity()
     {
         if (!grounded && !onLadder)
@@ -253,18 +276,8 @@ public class PlayerMovement : MonoBehaviour
     private void ResetCrouch()
     {
         readyToCrouch = true;
-    }    
-    
-    private void ResetRun()
-    {
-        readyToRun = true;
-    }
-
-    private void ResetVision()
-    {
-        readyToVision = true; 
-    }
-
+    }   
+ 
     private void ResetInteraction()
     {
         readyToInteract = true;
@@ -302,31 +315,15 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    ///TODO///
-    ///Do Vision Shading
-    //private void ApplyVisionEffect(float intensity)
-    //{
-    //    // Adjust the overall intensity of the vision effect
-    //    RenderSettings.ambientLight = Color.Lerp(Color.white, visionColor, intensity);
-    //}
+    public void ToggleRenderFeatures(bool isEnabled)
+    {
+        for (int i = 0; i < renderFeatureManager.renderFeatures.Count; i++)
+        {
+            RenderFeatureToggle toggleObj = renderFeatureManager.renderFeatures[i];
+            toggleObj.isEnabled = isEnabled;
+            toggleObj.feature.SetActive(isEnabled);
+            renderFeatureManager.renderFeatures[i] = toggleObj;
+        }
+    }
 
-    //private void Vision()
-    //{
-    //    float visionTime = Time.time - visionStartTime;
-    //    float visionProgress = Mathf.Clamp01(visionTime / visionDuration);
-
-    //    // Calculate current vision intensity (darkness) based on the vision progress
-    //    currentVisionIntensity = Mathf.Lerp(0f, 1f, visionProgress);
-
-    //    // Apply vision effect to the material
-    //    visionMaterial.SetFloat("_VisionIntensity", currentVisionIntensity);
-    //    visionMaterial.SetColor("_VisionColor", visionColor);
-
-    //    if (visionProgress >= 1f)
-    //    {
-    //        // Vision effect completed, reset variables
-    //        isVision = false;
-    //        currentVisionIntensity = 0f;
-    //    }
-    //}
 }
