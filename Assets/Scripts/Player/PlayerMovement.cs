@@ -35,7 +35,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] KeyCode crouchKey = KeyCode.LeftControl;
     [SerializeField] KeyCode runKey = KeyCode.LeftShift;
     [SerializeField] KeyCode visionKey = KeyCode.Mouse1;
-    [SerializeField] KeyCode interactKey = KeyCode.Mouse0;
+    [SerializeField] KeyCode interactKey = KeyCode.E;
 
     [Header("Checks")]
     bool readyToJump;
