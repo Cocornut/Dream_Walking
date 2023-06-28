@@ -6,21 +6,23 @@ TagManager:
   tags:
   - Ground
   - Ladder
+  - Door
+  - Pickup
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Camera
   - Water
   - UI
+  - Empty
   - 
-  - postProcessing
   - 
   - Outline
   - no Outline
-  - 
-  - 
-  - 
+  - whatIsGround
+  - whatIsPlayer
+  - whatIsEnemy
   - 
   - 
   - 

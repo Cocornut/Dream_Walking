@@ -51,12 +51,12 @@ public class PlayerMovement : MonoBehaviour
     [Header("Components")]
     public Transform orientation;
     public Transform cameraPosition;
-    Vector3 moveDirection;
-    Rigidbody rb;
+    private Vector3 moveDirection;
+    private Rigidbody rb;
 
     [Header("Input")]
-    float horizontalInput;
-    float verticalInput;
+    private float horizontalInput;
+    private float verticalInput;
 
     
     private void Start()
