@@ -20,6 +20,8 @@ public class PlayerMovement : MonoBehaviour
     //Only added outlines for now
     [Header("Vision")]
     [SerializeField] RenderFeatureManager renderFeatureManager;
+    [SerializeField] PickupScript pickupScript;
+    [SerializeField] GameObject pickupObject;
 
     [Header("Cooldowns")]                                   // Player mechanics cooldowns
     [SerializeField] float jumpCooldown;
@@ -68,6 +70,12 @@ public class PlayerMovement : MonoBehaviour
         runCurrent = runCooldown;
         visionCurrent = visionCooldown;
         ResetInteraction();
+    }
+
+    private void Awake()
+    {
+        pickupObject = GameObject.FindGameObjectWithTag("Pickup");
+        pickupScript = pickupObject.GetComponent<PickupScript>();
     }
 
     private void Update()
@@ -324,6 +332,8 @@ public class PlayerMovement : MonoBehaviour
             toggleObj.feature.SetActive(isEnabled);
             renderFeatureManager.renderFeatures[i] = toggleObj;
         }
+        pickupObject.GetComponent<MeshRenderer>().enabled = isEnabled;
+        pickupScript.isRendered = isEnabled;
     }
 
 }

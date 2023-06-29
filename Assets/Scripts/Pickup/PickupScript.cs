@@ -5,13 +5,24 @@ using UnityEngine;
 public class PickupScript : MonoBehaviour
 {
     public bool isPickedUp = false;
+    public bool isRendered = false;
+
+    private void Start()
+    {
+        gameObject.GetComponent<MeshRenderer>().enabled = false;
+    }
+
+
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player") && !isPickedUp)
         {
-            isPickedUp = true;
-            gameObject.SetActive(false);
+            if (isRendered)
+            {
+                isPickedUp = true;
+                gameObject.SetActive(false);
+            }
         }
     }
 }
