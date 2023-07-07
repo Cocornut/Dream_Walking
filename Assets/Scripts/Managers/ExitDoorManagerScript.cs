@@ -10,7 +10,7 @@ public class ExitDoorManagerScript : MonoBehaviour
     private void Start()
     {
         pickupScript = FindObjectOfType<PickupScript>();
-        door = GameObject.FindGameObjectWithTag("Door");
+        door = GameObject.FindGameObjectWithTag("ExitDoor");
     }
 
     private void Update()

@@ -6,8 +6,9 @@ TagManager:
   tags:
   - Ground
   - Ladder
-  - Door
   - Pickup
+  - ExitDoor
+  - Key
   layers:
   - Default
   - TransparentFX
@@ -23,9 +24,9 @@ TagManager:
   - whatIsGround
   - whatIsPlayer
   - whatIsEnemy
-  - 
-  - 
-  - 
+  - whatIsPickup
+  - Door
+  - TrapDoor
   - 
   - 
   - 

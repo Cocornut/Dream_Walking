@@ -17,6 +17,11 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float airMultiplier;                   // Movement in air
     [SerializeField] float gravity = 9.8f;                  // Modifiable falling speed
 
+    [Header("Interaction")]
+    [SerializeField] float maxUseDistance;
+    [SerializeField] LayerMask useLayers;
+    [SerializeField] GameObject doorManager;
+
     //Only added outlines for now
     [Header("Vision")]
     [SerializeField] RenderFeatureManager renderFeatureManager;
@@ -46,13 +51,14 @@ public class PlayerMovement : MonoBehaviour
     bool readyToCrouch;
     [SerializeField] bool isCrouching;
     [SerializeField] bool isRunning;
-    [SerializeField] bool isVision;
-    bool readyToInteract;
+    [SerializeField] public bool isVision;
+    [SerializeField] bool readyToInteract;
     [SerializeField] bool isInteracting;
 
     [Header("Components")]
     public Transform orientation;
     public Transform cameraPosition;
+    public Transform PlayerCamera;
     private Vector3 moveDirection;
     private Rigidbody rb;
 
@@ -76,6 +82,8 @@ public class PlayerMovement : MonoBehaviour
     {
         pickupObject = GameObject.FindGameObjectWithTag("Pickup");
         pickupScript = pickupObject.GetComponent<PickupScript>();
+        PlayerCamera = GameObject.FindGameObjectWithTag("MainCamera").transform;
+        doorManager = GameObject.Find("DoorManager");
     }
 
     private void Update()
@@ -142,6 +150,18 @@ public class PlayerMovement : MonoBehaviour
             {
                 isVision = false;
             }
+        }
+
+        if (Input.GetKeyDown(interactKey))
+        {
+            if (!isInteracting && readyToInteract)
+            {
+                readyToInteract = false;
+
+                Interact();
+
+                Invoke(nameof(ResetInteraction), interactCooldown);
+            } 
         }
     }
 
@@ -265,7 +285,31 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-
+    private void Interact()
+    {
+        if (Physics.Raycast(PlayerCamera.position, PlayerCamera.forward, out RaycastHit hit, maxUseDistance, useLayers))
+        {
+            if (hit.collider.TryGetComponent<CorridorDoorScript>(out CorridorDoorScript door))
+            {
+                doorManager.GetComponent<DoorManagerScript>().CheckKeyCollected(door.doorID);
+                if (door.hasKey)
+                {
+                    if (door.isOpen)
+                    {
+                        door.Close();
+                    }
+                    else
+                    {
+                        door.Open(transform.position);
+                    }
+                }
+                else
+                {
+                    door.Budge();
+                }
+            }
+        }
+    }
 
     private void ApplyGravity()
     {
