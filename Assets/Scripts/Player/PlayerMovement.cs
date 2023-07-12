@@ -28,6 +28,10 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] PickupScript pickupScript;
     [SerializeField] GameObject pickupObject;
 
+    [Header("Pushing")]
+    [SerializeField] float pushForce = 5f;                  // Force applied to pushable object
+    [SerializeField] LayerMask pushableLayers;              // Layers of pushable objects 
+
     [Header("Cooldowns")]                                   // Player mechanics cooldowns
     [SerializeField] float jumpCooldown;
     [SerializeField] float crouchCooldown;
@@ -66,20 +70,17 @@ public class PlayerMovement : MonoBehaviour
     private float horizontalInput;
     private float verticalInput;
 
-    
-    private void Start()
+    private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
+
         ResetJump();
         ResetCrouch();
         runCurrent = runCooldown;
         visionCurrent = visionCooldown;
         ResetInteraction();
-    }
 
-    private void Awake()
-    {
         pickupObject = GameObject.FindGameObjectWithTag("Pickup");
         pickupScript = pickupObject.GetComponent<PickupScript>();
         PlayerCamera = GameObject.FindGameObjectWithTag("MainCamera").transform;

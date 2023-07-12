@@ -74,7 +74,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
   m_Name: XRayPickup
   m_EditorClassIdentifier: 
-  m_Active: 0
+  m_Active: 1
   settings:
     passTag: XRayPickup
     Event: 300
@@ -82,7 +82,7 @@ MonoBehaviour:
       RenderQueueType: 0
       LayerMask:
         serializedVersion: 2
-        m_Bits: 16384
+        m_Bits: 540672
       PassNames: []
     overrideMaterial: {fileID: 2100000, guid: 98e2667085fdaaa459c8e7f0c5443a79, type: 2}
     overrideMaterialPassIndex: 0
@@ -118,11 +118,12 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: 6945746376109076130}
   - {fileID: 4114671479499757981}
+  - {fileID: 4280147104147878217}
   - {fileID: -8216083027736965206}
   - {fileID: -3003814521561482372}
   - {fileID: 8762061241794445285}
   - {fileID: -4840936479857727307}
-  m_RendererFeatureMap: a22ef067873f64609d9903ffe83f1a39aa4f9f56049cfa8d7cfb2a879b4e50d6e53f60a946189979b5a8d981eb89d1bc
+  m_RendererFeatureMap: a22ef067873f64609d9903ffe83f1a3949b126311d23663baa4f9f56049cfa8d7cfb2a879b4e50d6e53f60a946189979b5a8d981eb89d1bc
   m_UseNativeRenderPass: 1
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -141,10 +142,10 @@ MonoBehaviour:
   m_AssetVersion: 2
   m_OpaqueLayerMask:
     serializedVersion: 2
-    m_Bits: 106111
+    m_Bits: 237183
   m_TransparentLayerMask:
     serializedVersion: 2
-    m_Bits: 7807
+    m_Bits: 532095
   m_DefaultStencilState:
     overrideStencilState: 0
     stencilReference: 0
@@ -172,7 +173,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 182040d270ccf704ca62b24c3371cb4f, type: 3}
   m_Name: ScreenSpaceOutlines
   m_EditorClassIdentifier: 
-  m_Active: 0
+  m_Active: 1
   renderPassEvent: 300
   outlinesLayerMask:
     serializedVersion: 2
@@ -185,7 +186,7 @@ MonoBehaviour:
     outlineColor: {r: 0, g: 0, b: 0, a: 1}
     outlineScale: 1
     depthThreshold: 5
-    robertsCrossMultiplier: 100
+    robertsCrossMultiplier: 15
     normalThreshold: 0.4
     steepAngleThreshold: 0.2
     steepAngleMultiplier: 25
@@ -194,6 +195,43 @@ MonoBehaviour:
     depthBufferBits: 16
     filterMode: 0
     backgroundColor: {r: 0, g: 0, b: 0, a: 0}
+    perObjectData: 0
+    enableDynamicBatching: 0
+    enableInstancing: 0
+--- !u!114 &4280147104147878217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 182040d270ccf704ca62b24c3371cb4f, type: 3}
+  m_Name: BarrelSpaceOutlines
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  renderPassEvent: 300
+  outlinesLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  outlinesOccluderLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  outlineSettings:
+    isEnabled: 1
+    outlineColor: {r: 0, g: 0, b: 0, a: 1}
+    outlineScale: 1
+    depthThreshold: 1.5
+    robertsCrossMultiplier: 100
+    normalThreshold: 0.4
+    steepAngleThreshold: 0.2
+    steepAngleMultiplier: 25
+  viewSpaceNormalsTextureSettings:
+    colorFormat: 0
+    depthBufferBits: 16
+    filterMode: 0
+    backgroundColor: {r: 0, g: 0, b: 0, a: 1}
     perObjectData: 0
     enableDynamicBatching: 0
     enableInstancing: 0
@@ -240,7 +278,7 @@ MonoBehaviour:
       RenderQueueType: 0
       LayerMask:
         serializedVersion: 2
-        m_Bits: 24576
+        m_Bits: 548864
       PassNames: []
     overrideMaterial: {fileID: 0}
     overrideMaterialPassIndex: 0

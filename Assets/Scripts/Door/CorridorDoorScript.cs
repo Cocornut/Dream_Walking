@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class CorridorDoorScript : MonoBehaviour
 {
@@ -36,6 +37,7 @@ public class CorridorDoorScript : MonoBehaviour
     {
         hasKey = true;
     }
+
 
     public bool CheckKeyCollected()
     {
@@ -120,6 +122,8 @@ public class CorridorDoorScript : MonoBehaviour
                 float dot = Vector3.Dot(forward, (userPosition - transform.position).normalized);
                 Debug.Log($"Dot: {dot.ToString("N3")}");
                 animationCoroutine = StartCoroutine(DoRotationOpen(dot));
+
+
             }
         }
     }

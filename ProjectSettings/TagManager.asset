@@ -9,6 +9,7 @@ TagManager:
   - Pickup
   - ExitDoor
   - Key
+  - Barrel
   layers:
   - Default
   - TransparentFX
@@ -27,9 +28,9 @@ TagManager:
   - whatIsPickup
   - Door
   - TrapDoor
+  - Ladder
   - 
-  - 
-  - 
+  - Barrel
   - 
   - 
   - 
