@@ -20,6 +20,10 @@ public class MarkerManagerScript : MonoBehaviour
 
     void Update()
     {
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+        }
         if (Input.GetKeyDown(sprayKey))
         {            
             if (Time.time - markerLastTime >= markerCooldown)

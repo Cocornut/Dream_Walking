@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,8 @@ public class DoorManagerScript : MonoBehaviour
 {
     [SerializeField] private List<CorridorDoorScript> doors = new List<CorridorDoorScript>();
     [SerializeField] private List<KeyScript> keys = new List<KeyScript>();
+
+    [SerializeField] private AudioSource pickupSound;
 
     public void RegisterDoor(CorridorDoorScript door)
     {
@@ -24,6 +27,11 @@ public class DoorManagerScript : MonoBehaviour
         {
             door.Unlock();
         }
+    }
+
+    public void PlayPickupSound()
+    {
+        pickupSound.Play();
     }
 
     public void CheckKeyCollected(int doorID)

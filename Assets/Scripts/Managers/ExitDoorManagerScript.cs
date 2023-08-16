@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,23 +6,36 @@ using UnityEngine;
 public class ExitDoorManagerScript : MonoBehaviour
 {
     PickupScript pickupScript;
-    GameObject door;
+    GameObject[] doors;
 
-    private void Start()
+    [SerializeField] private AudioSource pickupSound;
+
+    private void Awake()
     {
         pickupScript = FindObjectOfType<PickupScript>();
-        door = GameObject.FindGameObjectWithTag("ExitDoor");
+        doors = GameObject.FindGameObjectsWithTag("ExitDoor");
     }
 
     private void Update()
     {
         if (!pickupScript.isPickedUp)
         {
-            door.SetActive(false);
+            foreach (var door in doors)
+            {
+                door.SetActive(false);
+            }
         }
         else
         {
-            door.SetActive(true);
+            foreach (var door in doors)
+            {
+                door.SetActive(true);
+            }
         }
+    }
+
+    internal void PlayPickupSound()
+    {
+        pickupSound.Play();
     }
 }

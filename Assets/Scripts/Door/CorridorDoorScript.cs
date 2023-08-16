@@ -10,6 +10,7 @@ public class CorridorDoorScript : MonoBehaviour
     public int doorID;
     GameObject manager;
 
+
     [Header("Checks")]
     public bool isOpen = false;
     public bool hasKey = false;
@@ -18,19 +19,26 @@ public class CorridorDoorScript : MonoBehaviour
     [Header("Rotation Configs")]
     [SerializeField] float speed = 1f;
     [SerializeField] float rotationAmount = 90f;
-    [SerializeField] float forwardDirection = 0;
+    public float forwardDirection = 0;
 
     private Vector3 startRotation;
     private Vector3 forward;
 
     private Coroutine animationCoroutine;
 
+    private Transform door;
+
+    [Header("Audio")]
+    [SerializeField] private AudioSource budgeSound;
+    [SerializeField] private AudioSource creakSound;
+
     private void Awake()
     {
-        startRotation = transform.rotation.eulerAngles;
-        forward = transform.right;
-        manager = GameObject.Find("DoorManager");
-        manager.GetComponent<DoorManagerScript>().RegisterDoor(this);
+        door = gameObject.transform;
+        startRotation = door.rotation.eulerAngles;
+        forward = door.forward;
+        manager = GameObject.FindGameObjectWithTag("DoorManager");
+        manager.GetComponent<DoorManagerScript>().RegisterDoor(this);        
     }
 
     public void Unlock()
@@ -46,9 +54,7 @@ public class CorridorDoorScript : MonoBehaviour
 
         foreach (KeyScript key in keys)
         {
-            int i = 1;
-            Debug.Log("Key: " + i);
-            i++;
+            Debug.Log("Key: " + key.keyID);
             if (key.keyID == doorID && key.isPickedUp)
             {
                 Debug.Log("Key Collected");
@@ -73,36 +79,38 @@ public class CorridorDoorScript : MonoBehaviour
 
     private IEnumerator DoBudge()
     {
-        Quaternion _startRotation = transform.rotation;
+        budgeSound.Play();
+
+        Quaternion _startRotation = door.rotation;
         Quaternion _endRotation = Quaternion.Euler(new Vector3(0, startRotation.y + 10f, 0));
         float time = 0f;
         float budgeDuration = 0.1f;
 
         while (time < budgeDuration)
         {
-            transform.rotation = Quaternion.Slerp(_startRotation, _endRotation, time);
+            door.rotation = Quaternion.Slerp(_startRotation, _endRotation, time);
             yield return null;
             time += Time.deltaTime;
         }
 
-        _startRotation = transform.rotation;
+        _startRotation = door.rotation;
         _endRotation = Quaternion.Euler(new Vector3(0, startRotation.y - 10f, 0));
         time = 0f;
 
         while (time < budgeDuration)
         {
-            transform.rotation = Quaternion.Slerp(_startRotation, _endRotation, time);
+            door.rotation = Quaternion.Slerp(_startRotation, _endRotation, time);
             yield return null;
             time += Time.deltaTime;
         }
 
-        _startRotation = transform.rotation;
+        _startRotation = door.rotation;
         _endRotation = Quaternion.Euler(startRotation);
         time = 0f;
 
         while (time < budgeDuration)
         {
-            transform.rotation = Quaternion.Slerp(_startRotation, _endRotation, time);
+            door.rotation = Quaternion.Slerp(_startRotation, _endRotation, time);
             yield return null;
             time += Time.deltaTime;
         }
@@ -119,21 +127,24 @@ public class CorridorDoorScript : MonoBehaviour
 
             if (isRotatingDoor)
             {
-                float dot = Vector3.Dot(forward, (userPosition - transform.position).normalized);
+                Vector3 doorForward = forward.normalized;
+                Vector3 userDirection = (userPosition - door.position).normalized;
+                float dot = Vector3.Dot(doorForward, userDirection);
                 Debug.Log($"Dot: {dot.ToString("N3")}");
                 animationCoroutine = StartCoroutine(DoRotationOpen(dot));
-
-
             }
         }
     }
 
     private IEnumerator DoRotationOpen(float forwardAmount)
     {
-        Quaternion _startRotation = transform.rotation;
+        creakSound.Play();
+
+
+        Quaternion _startRotation = door.rotation;
         Quaternion _endRotation;
 
-        if (forwardAmount >= forwardDirection)
+        if (forwardAmount <= forwardDirection)
         {
             _endRotation = Quaternion.Euler(new Vector3(0, startRotation.y - rotationAmount, 0));
         }
@@ -147,7 +158,7 @@ public class CorridorDoorScript : MonoBehaviour
         float time = 0;
         while (time < 1)
         {
-            transform.rotation = Quaternion.Slerp(_startRotation, _endRotation, time);
+            door.rotation = Quaternion.Slerp(_startRotation, _endRotation, time);
             yield return null;
             time += Time.deltaTime * speed;
         }
@@ -171,7 +182,9 @@ public class CorridorDoorScript : MonoBehaviour
 
     private IEnumerator DoRotationClose()
     {
-        Quaternion _startRotation = transform.rotation;
+        creakSound.Play();
+
+        Quaternion _startRotation = door.rotation;
         Quaternion _endRotation = Quaternion.Euler(startRotation);
 
         isOpen = false;
@@ -179,7 +192,7 @@ public class CorridorDoorScript : MonoBehaviour
         float time = 0;
         while (time < 1)
         {
-            transform.rotation = Quaternion.Slerp(_startRotation, _endRotation, time);
+            door.rotation = Quaternion.Slerp(_startRotation, _endRotation, time);
             yield return null;
             time += Time.deltaTime * speed;
         }

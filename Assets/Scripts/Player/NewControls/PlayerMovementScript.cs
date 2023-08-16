@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMovementScript : MonoBehaviour
 {
     [Header("Components")]
     private CharacterController controller;
+    public GameObject cameraObject;
     private Transform playerCamera;
 
     [Header("Movement")]
@@ -33,6 +35,7 @@ public class PlayerMovementScript : MonoBehaviour
     [SerializeField] RenderFeatureManager renderFeatureManager;
     [SerializeField] PickupScript pickupScript;
     [SerializeField] GameObject pickupObject;
+    [SerializeField] GameObject keyObject;
 
     [Header("Checks")]
     public bool isGrounded;
@@ -52,23 +55,53 @@ public class PlayerMovementScript : MonoBehaviour
     [SerializeField] float interactCooldown;
     [SerializeField] float visionCooldown;
 
+    [SerializeField] Image runCooldownImage;
+    [SerializeField] Image visionCooldownImage;
+
     private float visionCurrent;
     private float runCurrent;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource leftStep;
+    [SerializeField] private AudioSource rightStep;
+
+    [SerializeField] private AudioSource leftRun;
+    [SerializeField] private AudioSource rightRun;
+
+    [SerializeField] private AudioSource jumpStart;
+    [SerializeField] private AudioSource jumpEnd;
+
+    private float footstepTimer;
+    private bool left;
+    private bool right;
+
+    private bool playRunSound;
+    private bool playStepSound;
+
+    private bool wasGrounded = true;
+    private float notGroundedTimer = 0f;
+    private const float fallThreshold = 0.2f;
 
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
-        playerCamera = gameObject.transform.Find("Camera").transform;
+        GameObject camera = Instantiate(cameraObject, new Vector3(transform.position.x, transform.position.y + 0.579f, transform.position.z + 0.054f), Quaternion.identity, transform);
+        playerCamera = camera.transform;
 
-        doorManager = GameObject.Find("DoorManager");
+        doorManager = GameObject.FindGameObjectWithTag("DoorManager");
         renderFeatureManager = GameObject.Find("RenderFeatureToggler").GetComponent<RenderFeatureManager>();
 
         pickupObject = GameObject.FindGameObjectWithTag("Pickup");
         pickupScript = pickupObject.GetComponent<PickupScript>();
 
+        keyObject = GameObject.FindGameObjectWithTag("Key");
+
         visionCurrent = visionCooldown;
         runCurrent = runCooldown;
+
+        runCooldownImage = GameObject.Find("SprintCooldown").GetComponent<Image>();
+        visionCooldownImage = GameObject.Find("VisionCooldown").GetComponent<Image>();
+
         ResetJump();
         ResetCrouch();
         ResetInteraction();
@@ -78,11 +111,14 @@ public class PlayerMovementScript : MonoBehaviour
     {
         CheckBooleans();
         MyInput();
+        Highlight();
+        UpdateCooldownUI();
     }
 
     private void FixedUpdate()
     {
         MovePlayer();
+        PlayFootsteps();
     }
 
     private void MovePlayer()
@@ -193,9 +229,132 @@ public class PlayerMovementScript : MonoBehaviour
         }
     }
 
+    private void UpdateCooldownUI()
+    {
+        runCooldownImage.fillAmount = runCurrent / runCooldown;
+        visionCooldownImage.fillAmount = visionCurrent / visionCooldown;
+    }
+
+    private void PlayFootsteps()
+    {
+        if (playStepSound)
+        {
+            footstepTimer += Time.deltaTime;
+
+            if (footstepTimer >= 1f)
+            {
+                if (!left)
+                {
+                    leftStep.Play();
+                    left = true;
+                    footstepTimer = 0.5f;
+                }
+                else if (!right)
+                {
+                    rightStep.Play();
+                    right = true;
+                    footstepTimer = 0f;
+                }
+            }
+            if (footstepTimer >= 0.5f)
+            {
+                left = false;
+            }
+            if (footstepTimer >= 1.0f)
+            {
+                right = false;
+            }
+        }
+        else if (playRunSound)
+        {
+            footstepTimer += Time.deltaTime;
+
+            if (footstepTimer >= 0.7f)
+            {
+                if (!left)
+                {
+                    leftRun.Play();
+                    left = true;
+                    footstepTimer = 0.35f;
+                }
+                else if (!right)
+                {
+                    rightRun.Play();
+                    right = true;
+                    footstepTimer = 0f;
+                }
+            }
+            if (footstepTimer >= 0.5f)
+            {
+                left = false;
+            }
+            if (footstepTimer >= 1.0f)
+            {
+                right = false;
+            }
+        }
+        else
+        {
+            left = false;
+            right = false;            
+        }
+    }
+
     private void CheckBooleans()
     {
         isGrounded = controller.isGrounded;
+
+        if (!isGrounded)
+        {
+            wasGrounded = false;
+            notGroundedTimer += Time.deltaTime;
+        }
+        else
+        {
+            if (!wasGrounded && notGroundedTimer >= fallThreshold)
+            {
+                // Play fall sound
+                jumpEnd.Play();
+            }
+
+            wasGrounded = true;
+            notGroundedTimer = 0f;
+        }
+
+        if (xInput != 0 || zInput != 0)
+        {
+            if (isGrounded)
+            {
+                if (isCrouching)
+                {
+                    playRunSound = false;
+                    playStepSound = true;
+                }
+                else 
+                {
+                    if (isRunning)
+                    {
+                        playStepSound = false;
+                        playRunSound = true;
+                    }
+                    else
+                    {
+                        playRunSound = false;
+                        playStepSound = true;
+                    }
+                }
+            }
+            else
+            {
+                playStepSound = false;
+                playRunSound = false;
+            }
+        }
+        else
+        {
+            playRunSound = false;
+            playStepSound = false;
+        }
 
         if (runCurrent > 0 && isRunning)
         {
@@ -241,6 +400,8 @@ public class PlayerMovementScript : MonoBehaviour
 
     private void Jump()
     {
+        jumpStart.Play();
+
         if (onLadder)
         {
             // Calculate jump direction away from the ladder
@@ -280,6 +441,27 @@ public class PlayerMovementScript : MonoBehaviour
         readyToInteract = true;
     }
 
+    private void Highlight()
+    {
+
+        if (Physics.Raycast(playerCamera.position, playerCamera.forward, out RaycastHit hit, interactDistance, useLayers))
+        {
+            if (hit.collider.TryGetComponent<KeyScript>(out KeyScript key))
+            {
+                key.Highlight();
+            }
+            else if (hit.collider.TryGetComponent<PickupScript>(out PickupScript pickup))
+            {
+                pickup.Highlight();
+            }
+        }
+        else
+        {
+            keyObject.GetComponent<KeyScript>().StopHighlight();
+            pickupObject.GetComponent<PickupScript>().StopHighlight();
+        }
+    }
+
     private void Interact()
     {
         if (Physics.Raycast(playerCamera.position, playerCamera.forward, out RaycastHit hit, interactDistance, useLayers))
@@ -287,9 +469,9 @@ public class PlayerMovementScript : MonoBehaviour
             // Interacting with corridor doors
             if (hit.collider.TryGetComponent<CorridorDoorScript>(out CorridorDoorScript door))
             {
-                doorManager.GetComponent<DoorManagerScript>().CheckKeyCollected(door.doorID);
-                if (door.hasKey)
+                if (keyObject.GetComponent<KeyScript>().isPickedUp)
                 {
+                    door.Unlock();
                     if (door.isOpen)
                     {
                         door.Close();
@@ -303,6 +485,18 @@ public class PlayerMovementScript : MonoBehaviour
                 {
                     door.Budge();
                 }
+            }
+
+            // Interacting with keys
+            if (hit.collider.TryGetComponent<KeyScript>(out KeyScript key))
+            {
+                key.Pickup();
+            }
+
+            // Interacting with the pickup object
+            if (hit.collider.TryGetComponent<PickupScript>(out PickupScript pickup))
+            {
+                pickup.Pickup();
             }
         }
     }

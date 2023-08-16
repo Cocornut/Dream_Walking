@@ -13,10 +13,17 @@ public class Ladder : MonoBehaviour
 
     private void OnTriggerEnter(Collider collision)
     {
-        if (collision.CompareTag("Player"))
+        if (player != null)
         {
-            Debug.Log("Collision");
-            player.GetComponent<PlayerMovementScript>().onLadder = true;
+            if (collision.CompareTag("Player"))
+            {
+                Debug.Log("Collision");
+                player.GetComponent<PlayerMovementScript>().onLadder = true;
+            }
+        }
+        else
+        {
+            player = GameObject.FindGameObjectWithTag("Player");
         }
     }
 

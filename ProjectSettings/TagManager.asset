@@ -10,6 +10,12 @@ TagManager:
   - ExitDoor
   - Key
   - Barrel
+  - Map
+  - Ceiling
+  - DoorManager
+  - Enemy
+  - GameManager
+  - ExitDoorManager
   layers:
   - Default
   - TransparentFX
@@ -31,7 +37,7 @@ TagManager:
   - Ladder
   - 
   - Barrel
-  - 
+  - Ceiling
   - 
   - 
   - 

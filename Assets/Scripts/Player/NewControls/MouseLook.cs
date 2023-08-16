@@ -11,9 +11,10 @@ public class MouseLook : MonoBehaviour
     float xRotation = 0f;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         Cursor.lockState = CursorLockMode.Locked;
+        playerBody = GameObject.FindGameObjectWithTag("Player").transform;
     }
 
     // Update is called once per frame
